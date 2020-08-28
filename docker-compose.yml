@@ -1,0 +1,9 @@
+version: "3"
+services:
+
+  rocksdb:
+    build: ./rocksdb
+    image: skyzh/rocksdb-dbbench:1.0
+  titan:
+    build: ./titan
+    image: skyzh/titan-dbbench:1.0
