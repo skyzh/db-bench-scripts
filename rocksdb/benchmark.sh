@@ -10,9 +10,9 @@ echo "Running benchmark for $BENCH_TARGET"
 # SLEEP_TIME=1
 # NUM_KEYS_ITER=( 1000 100 100 100 )
 
-export DB_DIR=/tmp/${BENCH_TARGET}_bench_tmp_skyzh
-export WAL_DIR=/tmp/${BENCH_TARGET}_bench_tmp_wal_skyzh
-export LOG_DIR=/logs
+export DB_DIR=/data1/skyzh/${BENCH_TARGET}_bench_tmp
+export WAL_DIR=/data1/skyzh/${BENCH_TARGET}_bench_tmp_wal
+export LOG_DIR=/data1/skyzh/logs
 export NUM_THREADS=4
 DURATION=600   # run query for 10 minutes
 SLEEP_TIME=60  # sleep for 60 secs for each case, so we can observe disk I/O in prometheus
