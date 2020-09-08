@@ -16,18 +16,23 @@ function wait_tikv {
   done
 }
 
-for WORKLOAD in workloada workloadb workloadc workloadd workloade workloadf
+for YCSB in 1kb 16KB
 do
-  echo Running $WORKLOAD
-  /root/.tiup/bin/tiup playground &
-  wait_tikv
-  echo "TiKV up"
-  sleep 10
-  # restart tiup to clear all data (run by hand)
-  (cd $GOPATH/src/github.com/pingcap/go-ycsb && ./bin/go-ycsb load tikv -P workloads/$WORKLOAD | tee logs/$WORKLOAD)
-  sleep 5
-  (cd $GOPATH/src/github.com/pingcap/go-ycsb && ./bin/go-ycsb run tikv -P workloads/$WORKLOAD | tee logs/$WORKLOAD)
-  drop_cache_and_wait
-  kill -9 %1
-  fg
+  for WORKLOAD in workloada workloadb workloadc workloadd workloade workloadf
+  do
+    for DB in default titan
+    do
+      echo Running $WORKLOAD
+      tiup playground --kv.config config-$DB.toml &
+      wait_tikv
+      echo "TiKV up"
+      sleep 10
+      (cd $GOPATH/src/github.com/pingcap/go-ycsb && ./bin/go-ycsb load tikv -P workloads/$WORKLOAD -p ycsb_$YCSB.conf | tee logs/$DB_$WORKLOAD_$YCSB)
+      sleep 5
+      (cd $GOPATH/src/github.com/pingcap/go-ycsb && ./bin/go-ycsb run tikv -P workloads/$WORKLOAD -p ycsb_$YCSB.conf | tee logs/$DB_$WORKLOAD_$YCSB)
+      drop_cache_and_wait
+      kill -9 %1
+      fg
+    done
+  done
 done
