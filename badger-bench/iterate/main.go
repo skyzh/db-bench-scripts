@@ -10,8 +10,8 @@ import (
 
 	"github.com/dgraph-io/badger/v2"
 	"github.com/dgraph-io/badger/v2/options"
+	"github.com/dgraph-io/badger/y"
 	"github.com/paulbellamy/ratecounter"
-	"github.com/pingcap/badger/y"
 )
 
 const mil float64 = 1000000
@@ -84,6 +84,7 @@ func main() {
 			atomic.AddInt64(&counter, 1)
 			rc.Incr(1)
 		}
+		it.Close()
 		txn.Discard()
 	}
 	cancel()
