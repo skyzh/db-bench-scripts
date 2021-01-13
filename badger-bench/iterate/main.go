@@ -19,6 +19,7 @@ const mil float64 = 1000000
 var (
 	times     = flag.Int("times", 50, "How many times to iterate.")
 	valueSize = flag.Int("value_size", 128, "Value size in bytes.")
+	threads   = flag.Int("threads", 8, "goroutines")
 	dir       = flag.String("dir", "", "Base dir for writes.")
 )
 

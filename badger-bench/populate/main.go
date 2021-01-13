@@ -23,6 +23,7 @@ var (
 	seq       = flag.Bool("seq", true, "Fill sequentially.")
 	valueSize = flag.Int("value_size", 128, "Value size in bytes.")
 	chunkSize = flag.Int("chunk_size", 128, "Item per txn")
+	threads   = flag.Int("threads", 8, "goroutines")
 	dir       = flag.String("dir", "", "Base dir for writes.")
 )
 
@@ -105,7 +106,7 @@ func main() {
 		}
 	}()
 
-	N := 32
+	N := *threads
 	var wg sync.WaitGroup
 	for i := 0; i < N; i++ {
 		wg.Add(1)
