@@ -62,7 +62,8 @@ func writeBatch(entries []*entry, from int) int {
 	for _, e := range entries {
 		y.Check(txn.Set(e.Key, e.Value))
 	}
-	txn.CommitAt(uint64(time.Now().Unix()), nil)
+	err := txn.CommitAt(uint64(time.Now().Unix()), nil)
+	y.Check(err)
 	return len(entries)
 }
 
@@ -75,7 +76,7 @@ func main() {
 
 	nw := *numKeys
 	fmt.Printf("TOTAL KEYS TO WRITE: %s\n", humanize(int64(nw)))
-	opt := badger.DefaultOptions(*dir).WithCompression(options.None).WithBlockCacheSize(0).WithIndexCacheSize(0).WithSyncWrites(true)
+	opt := badger.DefaultOptions(*dir).WithCompression(options.None).WithBlockCacheSize(0).WithIndexCacheSize(0)
 
 	var err error
 
@@ -108,28 +109,27 @@ func main() {
 
 	N := *threads
 	var wg sync.WaitGroup
-	for i := 0; i < N; i++ {
+	threshold := make(chan struct{}, N)
+	for i := 0; i < int(nw/float64(*chunkSize)); i++ {
 		wg.Add(1)
+		threshold <- struct{}{}
 		go func(proc int) {
-			var written float64
-			for written < nw/float64(N) {
-				entries := make([]*entry, *chunkSize)
-				for i := 0; i < len(entries); i++ {
-					e := new(entry)
-					e.Key = make([]byte, 22)
-					e.Value = make([]byte, *valueSize)
-					entries[i] = e
-				}
-
-				wrote := float64(writeBatch(entries, (int(nw)*proc/N)+int(written)))
-
-				wi := int64(wrote)
-				atomic.AddInt64(&counter, wi)
-				rc.Incr(wi)
-
-				written += wrote
+			entries := make([]*entry, *chunkSize)
+			for i := 0; i < len(entries); i++ {
+				e := new(entry)
+				e.Key = make([]byte, 22)
+				e.Value = make([]byte, *valueSize)
+				entries[i] = e
 			}
+
+			wrote := float64(writeBatch(entries, proc*(*chunkSize)))
+
+			wi := int64(wrote)
+			atomic.AddInt64(&counter, wi)
+			rc.Incr(wi)
+
 			wg.Done()
+			<-threshold
 		}(i)
 	}
 	// 	wg.Add(1) // Block

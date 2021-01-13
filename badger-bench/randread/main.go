@@ -115,9 +115,11 @@ func main() {
 	}()
 
 	N := *threads
+	threshold := make(chan struct{}, N)
 	var wg sync.WaitGroup
 	for i := 0; i < N*(*times); i++ {
 		wg.Add(1)
+		threshold <- struct{}{}
 		go func(proc int) {
 			var readTotal float64
 
@@ -140,6 +142,7 @@ func main() {
 				readTotal += float64(rd)
 			}
 			wg.Done()
+			<-threshold
 		}(i)
 	}
 	// 	wg.Add(1) // Block
