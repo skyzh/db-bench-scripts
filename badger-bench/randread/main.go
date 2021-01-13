@@ -21,7 +21,7 @@ const mil float64 = 1000000
 var (
 	numKeys   = flag.Float64("keys", 10.0, "How many keys to read.")
 	times     = flag.Int("times", 16, "How many times to read")
-	valueSize = flag.Int("valsz", 128, "Value size in bytes.")
+	valueSize = flag.Int("value_size", 128, "Value size in bytes.")
 	chunkSize = flag.Int("chunk_size", 128, "Item per txn")
 	dir       = flag.String("dir", "", "Base dir for reads.")
 )
